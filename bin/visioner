@@ -1,11 +1,39 @@
 #!/usr/bin/env ruby
 
 require 'visioner'
+require 'optparse'
 
-if ARGV.empty?
-  puts "Visioner automatically renames your pictures using Google API Visioner"
-  puts "Usage: visioner image ..."
+options = {}
+opts = OptionParser.new
+
+opts.banner = "Visioner automatically renames your pictures using Google API Visioner and metadata.\n"
+opts.banner = opts.banner + "Make sure you have set GOOGLE_API_KEY in your env.\n"
+opts.banner = opts.banner + "Usage: visioner [options] image ..."
+
+opts.on("-f", "--format FORMAT", "Desired format for the new filenames") do |f|
+  options[:format] = f
+end
+
+opts.on("-h", "--help", "Displays help") do
+  puts opts
+  exit
+end
+
+opts.parse!
+
+if options[:format].nil?
+  puts "Missing option: format"
+  puts "Format directives:"
+  puts "   label - uses google vision API to find a label"
+  puts "   locality - uses metadata to find the locality / city"
+  puts "   country - uses metadata to find the country"
+  puts "   date - uses metadata to find the original date"
+  puts "Format example: date_country_label"
+  puts opts
+  exit 1
+elsif ARGV.empty?
+  puts opts
   exit 1
 else
-  Visioner.rename_all(ARGV)
+  Visioner.rename_all(ARGV, options)
 end
